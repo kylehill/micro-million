@@ -5,10 +5,46 @@
 </head>
 <body>
   <main>
-    
+    <div id="money-text"></div>
+    <div id="rate-text"></div>
+    <button id="invest-button">Invest!</button>
+    <span>($1 = $0.01 per second)</span>
   </main>
   <script>
-    
+    const $ = (selector) => { return document.querySelector(selector) }
+    const state = { money: 0, rate: 1, start: Date.now(), latest: Date.now(), done: false }
+
+    const cycle = () => {
+      if (state.done) { return win() }
+      const cycles = Math.floor((Date.now() - state.latest) / 250)
+      state.latest += cycles * 250
+      state.money += cycles * (state.rate / 4)
+      state.done = (state.money >= 1e6)
+      repaint()
+      setTimeout(cycle, 100)
+    }
+
+    const win = () => {
+      const text = document.createElement("div")
+      text.textContent = "You have a million dollars!"
+      text.style.cssText = `position: absolute; top: ${(Math.random() * 90).toFixed(2)}vh; left: ${(Math.random() * 90).toFixed(2)}vw;`
+      $("main").appendChild(text)
+      setTimeout(win, 200)
+    }
+
+    const repaint = () => {
+      $("#money-text").textContent = `You have ${state.money.toLocaleString('en-US', {currency: 'USD', style: 'currency'})}`
+      $("#rate-text").textContent = `You're making ${state.rate.toLocaleString('en-US', {currency: 'USD', style: 'currency'})} per second`
+    }
+
+    $("#invest-button").onclick = () => {
+      if (state.done) { return }
+      state.rate += (Math.floor(state.money) / 100)
+      state.money = 0
+      repaint()
+    }
+
+    cycle()
   </script>
 </body>
 </html>
